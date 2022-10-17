@@ -1,52 +1,37 @@
 package agh.ics.oop;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
+
 import static java.lang.System.out;
 
 public class World {
     public static void main(String[] args) {
         out.println("Start");
-        run(replace(args));
+        Direction[] directions = Stream.of(args)
+                .filter(e -> ("f".equals(e) || "b".equals(e) || "r".equals(e) || "l".equals(e)))
+                .map(World::mapDirection)
+                .toArray(Direction[]::new);
+        Stream.of(directions)
+                .forEach(e -> out.println("Zwierzak " + getDirection(e)));
         out.println("Stop");
     }
 
-    public static Direction[] replace(String[] arr) {
-        Direction[] directions = new Direction[arr.length];
-        int counter = 0;
-        for (String str : arr) {
-            switch (str) {
-                case "f" -> {
-                    directions[counter] = Direction.FORWARD;
-                    counter++;
-                }
-                case "b" -> {
-                    directions[counter] = Direction.BACKWARD;
-                    counter++;
-                }
-                case "r" -> {
-                    directions[counter] = Direction.RIGHT;
-                    counter++;
-                }
-                case "l" -> {
-                    directions[counter] = Direction.LEFT;
-                    counter++;
-                }
-                default -> {
-                }
-            }
-        }
-        return Arrays.copyOfRange(directions, 0, counter);
+    public static Direction mapDirection(String element){
+        return switch (element) {
+            case "f" -> Direction.FORWARD;
+            case "b" -> Direction.BACKWARD;
+            case "r" -> Direction.RIGHT;
+            default -> Direction.LEFT;
+        };
     }
 
-    public static void run(Direction[] arr) {
-        for (Direction dir : arr) {
-            String message = switch (dir) {
-                case FORWARD -> "Zwierzak idzie do przodu";
-                case BACKWARD -> "Zwierzak idzie do tylu";
-                case RIGHT -> "Zwierzak skreca w prawo";
-                case LEFT -> "Zwierzak skreca w lewo";
-            };
-            out.println(message);
-        }
+    public static String getDirection(Direction element){
+        return switch (element) {
+            case FORWARD -> "idzie do przodu";
+            case BACKWARD -> "idzie do tylu";
+            case RIGHT -> "skreca w prawo";
+            default -> "skreca w lewo";
+        };
     }
 }
