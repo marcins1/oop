@@ -3,15 +3,27 @@ package agh.ics.oop;
 public class Animal {
     private MapDirection direction;
     private Vector2d position;
+    private final IWorldMap map;
 
-    public Animal(){
+    public Animal(IWorldMap map){
         this.direction = MapDirection.NORTH;
         this.position = new Vector2d(2, 2);
+        this.map = map;
     }
 
+    public Animal(IWorldMap map, Vector2d initialPosition){
+        this.direction = MapDirection.NORTH;
+        this.map = map;
+        this.position = initialPosition;
+    }
     @Override
     public String toString() {
-        return "Orientacja: " + direction + ", Polozenie: " + position;
+        return switch (this.direction){
+            case NORTH -> "N";
+            case SOUTH -> "S";
+            case WEST -> "W";
+            case EAST -> "E";
+        };
     }
 
     public boolean isAt(Vector2d position){
@@ -30,9 +42,19 @@ public class Animal {
             } else {
                 newPosition = this.position.subtract(this.direction.toUnitVector());
             }
-            if (newPosition.precedes(new Vector2d(4, 4)) && newPosition.follows(new Vector2d(0, 0))){
+            if (this.map.canMoveTo(newPosition)){
+                Vector2d oldPosition = this.position;
                 this.position = newPosition;
+                if (!this.map.place(this)){
+                    this.position = oldPosition;
+                } else {
+                    this.map.remove(oldPosition);
+                }
             }
         }
+    }
+
+    public Vector2d getPosition(){
+        return this.position;
     }
 }
