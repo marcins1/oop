@@ -1,47 +1,32 @@
 package agh.ics.oop;
 
-import java.util.ArrayList;
-import java.util.List;
 
-public class RectangularMap implements IWorldMap{
-    private final Animal[][] map;
+public class RectangularMap extends AbstractWorldMap{
     private final int width;
     private final int height;
 
     public RectangularMap(int width, int height){
-        this.map = new Animal[height][width];
         this.height = height;
         this.width = width;
     }
 
     public boolean canMoveTo(Vector2d position){
-        return position.x >= 0 && position.x < this.width && position.y >= 0 && position.y < this.height;
+        return position.x >= 0 && position.x < this.width && position.y >= 0 && position.y < this.height && super.canMoveTo(position);
     }
 
     public boolean place(Animal animal){
-        Vector2d position = animal.getPosition();
-        if (!isOccupied(position)){
-            this.map[position.y][position.x] = animal;
-            return true;
+        Vector2d animalPosition = animal.getPosition();
+        if (animalPosition.x >= 0 && animalPosition.x < this.width && animalPosition.y >= 0 && animalPosition.y < this.height){
+            return super.place(animal);
         }
         return false;
     }
 
-    public boolean isOccupied(Vector2d position){
-        return map[position.y][position.x] != null;
+    public Vector2d getLowerLeft(){
+        return new Vector2d(0, 0);
     }
 
-    public Object objectAt(Vector2d position){
-        return this.map[position.y][position.x];
-    }
-
-    public void remove(Vector2d position){
-        this.map[position.y][position.x] = null;
-    }
-
-    @Override
-    public String toString() {
-        MapVisualizer visualizer = new MapVisualizer(this);
-        return visualizer.draw(new Vector2d(0, 0), new Vector2d(this.width - 1, this.height - 1));
+    public Vector2d getUpperRight(){
+        return new Vector2d(this.width - 1, this.height - 1);
     }
 }
