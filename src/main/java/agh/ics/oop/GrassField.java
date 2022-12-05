@@ -1,15 +1,17 @@
 package agh.ics.oop;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class GrassField extends AbstractWorldMap{
     private final int quantity;
-    private final ArrayList<Grass> grasses;
+    private final Map<Vector2d, Grass> grasses;
 
     public GrassField(int quantity){
         this.quantity = quantity;
-        this.grasses = new ArrayList<Grass>();
+        this.grasses = new HashMap<>();
         spawnGrasses(quantity);
     }
 
@@ -17,12 +19,12 @@ public class GrassField extends AbstractWorldMap{
         Object mapElement = objectAt(position);
         if (mapElement instanceof Grass){
             // Eating the grass
-            grasses.remove(mapElement);
+            grasses.remove(position);
             Vector2d newGrassPosition;
             do{
                 newGrassPosition = getPositionForGrass();
             } while (newGrassPosition.equals(position));
-            grasses.add(new Grass(newGrassPosition));
+            grasses.put(newGrassPosition, new Grass(newGrassPosition));
             //
             return true;
         } else return mapElement == null;
@@ -31,7 +33,7 @@ public class GrassField extends AbstractWorldMap{
     public boolean place(Grass grass){
         Vector2d position = grass.getPosition();
         if (!isOccupied(position)){
-            this.grasses.add(grass);
+            this.grasses.put(position, grass);
             return true;
         }
         return false;
@@ -41,12 +43,7 @@ public class GrassField extends AbstractWorldMap{
         if (super.isOccupied(position)){
             return true;
         }
-        for (Grass grass: this.grasses) {
-            if (grass.getPosition().equals(position)){
-                return true;
-            }
-        }
-        return false;
+        return objectAt(position) instanceof Grass;
     }
 
     public Object objectAt(Vector2d position){
@@ -54,32 +51,27 @@ public class GrassField extends AbstractWorldMap{
         if (check != null){
             return check;
         }
-        for (Grass grass: this.grasses) {
-            if (grass.getPosition().equals(position)){
-                return grass;
-            }
-        }
-        return null;
+        return grasses.get(position);
     }
 
     public Vector2d getLowerLeft(){
         Vector2d ll = new Vector2d(0, 0);
-        for (Grass grass:this.grasses) {
-            ll = ll.lowerLeft(grass.getPosition());
+        for (Vector2d position:this.grasses.keySet()) {
+            ll = ll.lowerLeft(position);
         }
-        for (Animal animal: this.animals) {
-            ll = ll.lowerLeft(animal.getPosition());
+        for (Vector2d position:this.animals.keySet()) {
+            ll = ll.lowerLeft(position);
         }
         return ll;
     }
 
     public Vector2d getUpperRight(){
         Vector2d ur = new Vector2d(0, 0);
-        for (Grass grass:this.grasses) {
-            ur = ur.upperRight(grass.getPosition());
+        for (Vector2d position:this.grasses.keySet()) {
+            ur = ur.upperRight(position);
         }
-        for (Animal animal: this.animals) {
-            ur = ur.upperRight(animal.getPosition());
+        for (Vector2d position:this.animals.keySet()) {
+            ur = ur.upperRight(position);
         }
         return ur;
     }
