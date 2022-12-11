@@ -5,7 +5,6 @@ import java.util.stream.Stream;
 public class OptionsParser {
     public static MoveDirection[] parse(String[] args){
         return Stream.of(args)
-                .filter(e -> (e.equals("f") || e.equals("forward") || e.equals("b") || e.equals("backward") || e.equals("l") || e.equals("left") || e.equals("r") || e.equals("right")))
                 .map(OptionsParser::mapDirection)
                 .toArray(MoveDirection[]::new);
     }
@@ -15,7 +14,8 @@ public class OptionsParser {
             case "f", "forward" -> MoveDirection.FORWARD;
             case "b", "backward" -> MoveDirection.BACKWARD;
             case "r", "right" -> MoveDirection.RIGHT;
-            default -> MoveDirection.LEFT;
+            case "l", "left" -> MoveDirection.LEFT;
+            default -> throw new IllegalArgumentException(element + " is not legal move specification");
         };
     }
 }

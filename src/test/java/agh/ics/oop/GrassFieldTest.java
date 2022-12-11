@@ -22,10 +22,10 @@ public class GrassFieldTest {
         GrassField map = new GrassField(0);
         assertTrue(map.place(new Animal(map, new Vector2d(5, 5))));
         assertTrue(map.place(new Animal(map, new Vector2d(-1000, 1000))));
-        assertFalse(map.place(new Animal(map, new Vector2d(5, 5))));
+        assertThrows(IllegalArgumentException.class, () -> map.place(new Animal(map, new Vector2d(5, 5))));
         assertTrue(map.place(new Grass(new Vector2d(6, 6))));
-        assertFalse(map.place(new Grass(new Vector2d(5, 5))));
-        assertFalse(map.place(new Grass(new Vector2d(6, 6))));
+        assertThrows(IllegalArgumentException.class, () -> map.place(new Grass(new Vector2d(5, 5))));
+        assertThrows(IllegalArgumentException.class, () -> map.place(new Grass(new Vector2d(6, 6))));
     }
 
     @Test

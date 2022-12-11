@@ -13,6 +13,7 @@ public class IntegrationTest {
         SimulationEngine engine = new SimulationEngine(test, map2, positions);
 
         assertArrayEquals(test, OptionsParser.parse(new String[] {"f", "b", "r", "l", "f", "f", "r", "r", "f", "f", "f", "f", "f", "f", "f", "f"}));
+        assertThrows(IllegalArgumentException.class, () -> OptionsParser.parse(new String[]{"f", "b", "fb", "backward"}));
 
         Animal animal0 = new Animal(map1, positions[0]);
         assertEquals("N", animal0.toString());

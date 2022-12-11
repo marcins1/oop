@@ -8,6 +8,7 @@ import java.util.Map;
 abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver {
     protected Map<Vector2d, Animal> animals = new HashMap<>();
     protected MapVisualizer visualizer = new MapVisualizer(this);
+    protected MapBoundary boundary = new MapBoundary();
 
     public boolean canMoveTo(Vector2d position){
         return !isOccupied(position);
@@ -17,10 +18,13 @@ abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver {
         Vector2d position = animal.getPosition();
         if (!isOccupied(position)){
             animal.addObserver(this);
+            animal.addObserver(boundary);
             this.animals.put(position, animal);
+            this.boundary.insertElement(position);
             return true;
+        } else {
+            throw new IllegalArgumentException("Can't place animal on position: " + position);
         }
-        return false;
     }
 
     public boolean isOccupied(Vector2d position){

@@ -18,14 +18,7 @@ public class GrassField extends AbstractWorldMap{
     public boolean canMoveTo(Vector2d position){
         Object mapElement = objectAt(position);
         if (mapElement instanceof Grass){
-            // Eating the grass
-            grasses.remove(position);
-            Vector2d newGrassPosition;
-            do{
-                newGrassPosition = getPositionForGrass();
-            } while (newGrassPosition.equals(position));
-            grasses.put(newGrassPosition, new Grass(newGrassPosition));
-            //
+            eatGrass(position);
             return true;
         } else return mapElement == null;
     }
@@ -34,9 +27,11 @@ public class GrassField extends AbstractWorldMap{
         Vector2d position = grass.getPosition();
         if (!isOccupied(position)){
             this.grasses.put(position, grass);
+            this.boundary.insertElement(position);
             return true;
+        } else {
+            throw new IllegalArgumentException("Can't place grass on position: " + position);
         }
-        return false;
     }
 
     public boolean isOccupied(Vector2d position){
@@ -55,34 +50,11 @@ public class GrassField extends AbstractWorldMap{
     }
 
     public Vector2d getLowerLeft(){
-        Vector2d ll = new Vector2d(0, 0);
-        for (Vector2d position:this.grasses.keySet()) {
-            ll = ll.lowerLeft(position);
-        }
-        for (Vector2d position:this.animals.keySet()) {
-            ll = ll.lowerLeft(position);
-        }
-        return ll;
+        return boundary.getLowerLeft();
     }
 
     public Vector2d getUpperRight(){
-        Vector2d ur = new Vector2d(0, 0);
-        for (Vector2d position:this.grasses.keySet()) {
-            ur = ur.upperRight(position);
-        }
-        for (Vector2d position:this.animals.keySet()) {
-            ur = ur.upperRight(position);
-        }
-        return ur;
-    }
-
-    public Vector2d getPositionForGrass(){
-        Random random = new Random();
-        Vector2d position;
-        do{
-            position = new Vector2d(random.nextInt((int)Math.sqrt(this.quantity * 10)), random.nextInt((int)Math.sqrt(this.quantity * 10)));
-        } while (objectAt(position) != null);
-        return position;
+        return boundary.getUpperRight();
     }
 
     public void spawnGrasses(int number){
@@ -91,7 +63,16 @@ public class GrassField extends AbstractWorldMap{
             Vector2d position;
             do{
                 position = new Vector2d(random.nextInt((int)Math.sqrt(this.quantity * 10)), random.nextInt((int)Math.sqrt(this.quantity * 10)));
-            } while (!place(new Grass(position)));
+            } while (isOccupied(position));
+            place(new Grass(position));
+        }
+    }
+
+    public void eatGrass(Vector2d position){
+        while (isOccupied(position)){
+            grasses.remove(position);
+            boundary.removeElement(position);
+            spawnGrasses(1);
         }
     }
 }

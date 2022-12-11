@@ -19,7 +19,7 @@ public class RectangularMap extends AbstractWorldMap{
         if (animalPosition.x >= 0 && animalPosition.x < this.width && animalPosition.y >= 0 && animalPosition.y < this.height){
             return super.place(animal);
         }
-        return false;
+        throw new IllegalArgumentException("Can't place grass on position: " + animalPosition);
     }
 
     public Vector2d getLowerLeft(){
