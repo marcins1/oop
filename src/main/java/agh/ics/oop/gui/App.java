@@ -2,39 +2,42 @@ package agh.ics.oop.gui;
 
 import agh.ics.oop.*;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.HPos;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.RowConstraints;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
-public class App extends Application {
+import java.io.FileNotFoundException;
+
+public class App extends Application implements IMapChangeObserver {
     private GrassField map;
     private GridPane grid;
+    private SimulationEngine engine;
 
     public void init(){
-        //String[] dane = {"f", "b", "r", "l", "f", "f", "r", "r", "f", "f", "f", "f", "f", "f", "f", "f"};
         try{
             this.grid = new GridPane();
-            String[] data = getParameters().getRaw().toArray(String[]::new);
-            MoveDirection[] directions = OptionsParser.parse(data);
+            this.grid.setAlignment(Pos.CENTER);
             this.map = new GrassField(10);
             Vector2d[] positions = { new Vector2d(2,2), new Vector2d(3,4) };
-            SimulationEngine engine = new SimulationEngine(directions, this.map, positions);
-            engine.run();
-            System.out.println("End positions");
-            System.out.println(this.map);
-        } catch (IllegalArgumentException ex) {
-            System.out.println(ex);
+            this.engine = new SimulationEngine(this.map, positions, 300);
+            this.engine.addObserver(this);
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
         }
     }
 
-    public void draw(){
+    public void draw() throws FileNotFoundException {
+        this.grid.setGridLinesVisible(false);
+        this.grid.setGridLinesVisible(true);
         Label coordinates = new Label("y\\x");
-        int rowSize = 25;
-        int columnSize = 25;
+        int rowSize = 35;
+        int columnSize = 45;
         GridPane.setHalignment(coordinates, HPos.CENTER);
         this.grid.add(coordinates, 0, 0);
         this.grid.getColumnConstraints().add(new ColumnConstraints(columnSize));
@@ -55,21 +58,47 @@ public class App extends Application {
             for (int j = 0; j <= this.map.getUpperRight().y - this.map.getLowerLeft().y; j++){
                 Object mapElement = this.map.objectAt(new Vector2d(this.map.getLowerLeft().x + i, this.map.getLowerLeft().y + j));
                 if (mapElement != null){
-                    Label element = new Label(mapElement.toString());
-                    GridPane.setHalignment(element, HPos.CENTER);
-                    this.grid.add(element,  i + 1, this.map.getUpperRight().y - this.map.getLowerLeft().y - j + 1);
+                    this.grid.add(new GuiElementBox((IMapElement) mapElement).guiElement,  i + 1, this.map.getUpperRight().y - this.map.getLowerLeft().y - j + 1);
                 }
             }
         }
     }
 
-
-    public void start(Stage primaryStage){
-        this.grid = new GridPane();
+    public void start(Stage primaryStage) throws FileNotFoundException {
+        TextField textField = new TextField();
+        textField.setMaxWidth(200);
+        Button button = new Button("Run");
+        button.setMaxWidth(150);
+        VBox inputBox = new VBox(textField, button);
+        inputBox.setAlignment(Pos.CENTER);
+        inputBox.setSpacing(5);
+        VBox applicationBox = new VBox(this.grid, inputBox);
+        applicationBox.setAlignment(Pos.CENTER);
+        applicationBox.setSpacing(20);
         draw();
-        this.grid.setGridLinesVisible(true);
-        Scene scene = new Scene(this.grid, 400, 400);
+        Scene scene = new Scene(applicationBox, 600, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
+        button.setOnAction(e -> {
+            String[] moves = textField.getText().split(" ");
+            MoveDirection[] directions = OptionsParser.parse(moves);
+            this.engine.setMoves(directions);
+            Thread engineThread = new Thread(this.engine);
+            engineThread.start();
+        });
+    }
+
+    @Override
+    public void mapChanged() {
+        Platform.runLater(() -> {
+            try {
+                this.grid.getRowConstraints().clear();
+                this.grid.getColumnConstraints().clear();
+                this.grid.getChildren().clear();
+                draw();
+            } catch (FileNotFoundException e) {
+                System.out.println(e.getMessage());
+            }
+        });
     }
 }

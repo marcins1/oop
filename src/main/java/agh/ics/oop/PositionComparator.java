@@ -11,10 +11,14 @@ public class PositionComparator implements Comparator<Vector2d> {
 
     @Override
     public int compare(Vector2d firstElement, Vector2d secondElement) {
+        int value;
         if (sortByX) {
-            return Integer.compare(firstElement.x, secondElement.x);
+            value = Integer.compare(firstElement.x, secondElement.x);
+            if (value == 0) return Integer.compare(firstElement.y, secondElement.y);
         } else {
-            return Integer.compare(firstElement.y, secondElement.y);
+            value = Integer.compare(firstElement.y, secondElement.y);
+            if (value == 0) return Integer.compare(firstElement.x, secondElement.x);
         }
+        return value;
     }
 }

@@ -1,7 +1,5 @@
 package agh.ics.oop;
 
-import java.util.ArrayList;
-
 public class Animal extends AbstractWorldMapElement{
     private MapDirection direction;
     private final IWorldMap map;
@@ -39,5 +37,14 @@ public class Animal extends AbstractWorldMapElement{
                 this.position = newPosition;
             }
         }
+    }
+
+    public String getResourceName(){
+        return switch (this.direction){
+            case NORTH -> "up.png";
+            case SOUTH -> "down.png";
+            case WEST -> "left.png";
+            case EAST -> "right.png";
+        };
     }
 }
